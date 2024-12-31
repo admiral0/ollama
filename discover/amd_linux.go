@@ -31,8 +31,9 @@ const (
 
 	// Direct Rendering Manager sysfs location
 	DRMDeviceDirGlob   = "/sys/class/drm/card*/device"
-	DRMTotalMemoryFile = "mem_info_vram_total"
-	DRMUsedMemoryFile  = "mem_info_vram_used"
+	// ROCM allocates on gtt on iGPUs. THIS IS A HACK
+	DRMTotalMemoryFile = "mem_info_gtt_total"
+	DRMUsedMemoryFile  = "mem_info_gtt_used"
 
 	// In hex; properties file is in decimal
 	DRMUniqueIDFile = "unique_id"
@@ -292,6 +293,7 @@ func AMDGetGPUInfo() ([]RocmGPUInfo, error) {
 		}
 
 		// iGPU detection, remove this check once we can support an iGPU variant of the rocm library
+		// this is now useless because GTT is usually 3/4 of RAM
 		if totalMemory < IGPUMemLimit {
 			reason := "unsupported Radeon iGPU detected skipping"
 			slog.Info(reason, "id", gpuID, "total", format.HumanBytes2(totalMemory))
